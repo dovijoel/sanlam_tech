@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Optional;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +26,7 @@ public class Transaction {
     public Instant transactionTimestamp;
 
     @Enumerated(EnumType.ORDINAL)
-    public ETransactionStatus successful;
+    public ETransactionStatus status;
 
     @Setter
     public String note;

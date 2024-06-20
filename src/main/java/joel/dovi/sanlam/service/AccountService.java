@@ -25,20 +25,31 @@ public class AccountService {
     @Transactional
     public Transaction processWithdrawal(Long accountId, BigDecimal withdrawalValue) {
         Account account = accountRepository.findById(accountId).orElseThrow(EntityNotFoundException::new);
-        ETransactionStatus transactionStatus = ETransactionStatus.UNKNOWN_ERROR; // default value if errors out
+        ETransactionStatus transactionStatus = null;
+        StringBuilder noteSb = new StringBuilder();
         Instant now = Instant.now();
 
-        // TODO balance sanity check
-        if (account.getCurrentBalance().compareTo(withdrawalValue) < 0) {
-            transactionStatus = ETransactionStatus.INSUFFICIENT_FUNDS;
-            account.setCurrentBalance(account.getCurrentBalance().add(withdrawalValue));
-            account.setLastUpdated(now);
+        // balance sanity check
+        Transaction latestTransaction = transactionRepository.findFirstByAccountAndStatusIsOrderByTransactionTimestampDesc(account, ETransactionStatus.SUCCESSFUL);
+        if (!latestTransaction.getTransactionTimestamp().equals(account.getLastUpdated())) {
+            transactionStatus = ETransactionStatus.UNKNOWN_ERROR;
+            noteSb.append("Account balance timestamp mismatch.").append('\n');
+        } else {
+            if (account.getCurrentBalance().compareTo(withdrawalValue) < 0) {
+                transactionStatus = ETransactionStatus.INSUFFICIENT_FUNDS;
+            } else {
+                transactionStatus = ETransactionStatus.SUCCESSFUL;
+                account.setCurrentBalance(account.getCurrentBalance().add(withdrawalValue));
+                account.setLastUpdated(now);
+            }
         }
+
         Transaction transaction = Transaction.builder()
                 .account(account)
                 .transactionValue(withdrawalValue)
                 .transactionTimestamp(now)
-                .successful(transactionStatus)
+                .status(transactionStatus)
+                .note(noteSb.toString())
                 .build();
 
         transactionRepository.save(transaction);

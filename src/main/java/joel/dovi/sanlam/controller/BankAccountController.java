@@ -1,7 +1,6 @@
 package joel.dovi.sanlam.controller;
 
 import jakarta.persistence.EntityNotFoundException;
-import joel.dovi.sanlam.model.ETransactionStatus;
 import joel.dovi.sanlam.model.Transaction;
 import joel.dovi.sanlam.model.WithdrawalEvent;
 import joel.dovi.sanlam.service.AccountService;
@@ -37,7 +36,7 @@ public class BankAccountController {
         }
 
         // After a successful withdrawal, publish a withdrawal event to SNS
-        WithdrawalEvent event = new WithdrawalEvent(amount, accountId, transaction.getSuccessful());
+        WithdrawalEvent event = new WithdrawalEvent(amount, accountId, transaction.getStatus());
 
         snsService.publish(event.toJson(), "withdrawal_events");
 
