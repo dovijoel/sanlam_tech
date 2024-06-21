@@ -14,6 +14,7 @@ import java.time.Instant;
 @Builder
 public class Transaction {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
     @ManyToOne // specifically optional is true for unknown accounts

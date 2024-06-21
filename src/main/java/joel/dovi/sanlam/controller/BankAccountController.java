@@ -38,7 +38,7 @@ public class BankAccountController {
         // After a successful withdrawal, publish a withdrawal event to SNS
         WithdrawalEvent event = new WithdrawalEvent(amount, accountId, transaction.getStatus());
 
-        snsService.publish(event.toJson(), "withdrawal_events");
+        snsService.publish(event.toJson(), "withdrawals");
 
         return ResponseEntity.ok(event);
     }

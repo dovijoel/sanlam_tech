@@ -10,7 +10,9 @@ import org.springframework.lang.NonNullApi;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    @Lock(LockModeType.PESSIMISTIC_READ) // pessimistic read to avoid changes to account based on dirty data
+    // pessimistic read to avoid changes to account based on dirty data
+    // locks across multiple instances of the service if DB is shared
+    @Lock(LockModeType.PESSIMISTIC_READ)
     @NonNull
     Optional<Account> findById(@NonNull Long accountId);
 }

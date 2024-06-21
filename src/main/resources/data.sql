@@ -1,0 +1,11 @@
+set @timenow =current_timestamp;
+insert into account (name, current_balance, last_updated) values ('test_1', 0.00, @timenow);
+insert into transaction (account_id, transaction_value, transaction_timestamp, status) values (1, 0.00, @timenow, 1);
+insert into account (name, current_balance, last_updated) values ('test_2', 0.00, @timenow);
+insert into transaction (account_id, transaction_value, transaction_timestamp, status) values (2, 0.00, @timenow, 1);
+insert into account (name, current_balance, last_updated) values ('test_3', 0.00, current_timestamp);
+insert into transaction (account_id, transaction_value, transaction_timestamp, status) values (3, 0.00, @timenow, 1);
+insert into account (name, current_balance, last_updated) values ('test_4', 0.00, current_timestamp);
+insert into transaction (account_id, transaction_value, transaction_timestamp, status) values (4, 0.00, @timenow, 1);
+insert into account (name, current_balance, last_updated) values ('test_5', 0.00, current_timestamp);
+insert into transaction (account_id, transaction_value, transaction_timestamp, status) values (5, 0.00, @timenow, 1);

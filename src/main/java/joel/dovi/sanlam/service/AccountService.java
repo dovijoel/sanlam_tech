@@ -39,7 +39,7 @@ public class AccountService {
                 transactionStatus = ETransactionStatus.INSUFFICIENT_FUNDS;
             } else {
                 transactionStatus = ETransactionStatus.SUCCESSFUL;
-                account.setCurrentBalance(account.getCurrentBalance().add(withdrawalValue));
+                account.setCurrentBalance(account.getCurrentBalance().subtract(withdrawalValue));
                 account.setLastUpdated(now);
             }
         }
