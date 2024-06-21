@@ -28,7 +28,6 @@ public class AccountService {
         ETransactionStatus transactionStatus = null;
         StringBuilder noteSb = new StringBuilder();
         Instant now = Instant.now();
-
         // balance sanity check
         Transaction latestTransaction = transactionRepository.findFirstByAccountAndStatusIsOrderByTransactionTimestampDesc(account, ETransactionStatus.SUCCESSFUL);
         if (!latestTransaction.getTransactionTimestamp().equals(account.getLastUpdated())) {
