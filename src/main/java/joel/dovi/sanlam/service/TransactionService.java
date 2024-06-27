@@ -38,6 +38,8 @@ public class TransactionService {
     public void executePendingCashTransactions() throws ConcurrencyExceededException {
         List<Transaction> transactions = transactionRepository.findTransactionsByStatusIs(ETransactionStatus.PENDING);
         if (!transactions.isEmpty()) {
+            int batchSize = Math.min(transactions.size(), 5000);
+            transactions = transactions.subList(0, batchSize);
             List<CashTransactionsToExecute> transactionsToExecutes = getCashTransactionsToExecutes(transactions);
             tigerBeetleService.executeCashTransactions(transactionsToExecutes);
             List<WithdrawalEvent> withdrawalEvents = new ArrayList<>();

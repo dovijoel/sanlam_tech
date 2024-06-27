@@ -10,9 +10,13 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @PropertySource("classpath:application.properties")
@@ -27,6 +31,9 @@ public class SnsService {
     private String snsAccountId;
     @Value("${aws.sns.endpoint_override}")
     private String snsEndpoint;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
+
+
 
     public SnsService(@Value("${aws.sns.region}")
                       String awsRegion,
@@ -41,14 +48,18 @@ public class SnsService {
                 .endpointOverride(new URI(this.snsEndpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
                 .build();
+
     }
 
     public void publish(String eventJson, String topicName) {
-        String snsTopicArn = String.format("arn:aws:sns:%s:%s:%s", awsRegion, snsAccountId, topicName);
-        PublishRequest publishRequest = PublishRequest.builder()
-                .message(eventJson)
-                .topicArn(snsTopicArn)
-                .build();
-        snsClient.publish(publishRequest);
+        Runnable task = () -> {
+            String snsTopicArn = String.format("arn:aws:sns:%s:%s:%s", awsRegion, snsAccountId, topicName);
+            PublishRequest publishRequest = PublishRequest.builder()
+                    .message(eventJson)
+                    .topicArn(snsTopicArn)
+                    .build();
+            snsClient.publish(publishRequest);
+        };
+        executorService.execute(task);
     }
 }
