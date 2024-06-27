@@ -1,5 +1,6 @@
 package joel.dovi.sanlam.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,9 +26,11 @@ public class Account {
 
     @OneToMany
     @Lazy
+    @JsonIgnore
     List<Transaction> transactions;
 
-    BigDecimal currentBalance;
-
     Instant lastUpdated;
+
+    @Transient
+    BigDecimal accountBalance;
 }

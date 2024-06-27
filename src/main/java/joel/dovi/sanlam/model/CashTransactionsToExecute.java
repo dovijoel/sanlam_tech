@@ -5,13 +5,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Setter
 @Getter
 @AllArgsConstructor
-public class WithdrawalToExecute {
+public class CashTransactionsToExecute {
     private Long accountId;
     private long transferId;
-    private int tbAccountId;
     private BigDecimal amount;
+    private BigInteger tigerbeetleId;
+    private ETransactionStatus status;
+    private String note;
 }

@@ -9,6 +9,7 @@ import joel.dovi.sanlam.repository.AccountRepository;
 import joel.dovi.sanlam.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,40 +22,27 @@ import java.util.Optional;
 public class AccountService {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
+    private TigerBeetleService tigerBeetleService;
 
     @Transactional
-    public Transaction processWithdrawal(Long accountId, BigDecimal withdrawalValue) {
+    public Transaction processCashTransaction(Long accountId, BigDecimal withdrawalValue) {
         Account account = accountRepository.findById(accountId).orElseThrow(EntityNotFoundException::new);
-        ETransactionStatus transactionStatus = null;
-        StringBuilder noteSb = new StringBuilder();
         Instant now = Instant.now();
-        // balance sanity check
-        Transaction latestTransaction = transactionRepository.findFirstByAccountAndStatusIsOrderByTransactionTimestampDesc(account, ETransactionStatus.SUCCESSFUL);
-        if (!latestTransaction.getTransactionTimestamp().equals(account.getLastUpdated())) {
-            transactionStatus = ETransactionStatus.UNKNOWN_ERROR;
-            noteSb.append("Account balance timestamp mismatch.").append('\n');
-        } else {
-            if (account.getCurrentBalance().compareTo(withdrawalValue) < 0) {
-                transactionStatus = ETransactionStatus.INSUFFICIENT_FUNDS;
-            } else {
-                transactionStatus = ETransactionStatus.SUCCESSFUL;
-                account.setCurrentBalance(account.getCurrentBalance().subtract(withdrawalValue));
-                account.setLastUpdated(now);
-            }
-        }
-
         Transaction transaction = Transaction.builder()
                 .account(account)
                 .transactionValue(withdrawalValue)
                 .transactionTimestamp(now)
-                .status(transactionStatus)
-                .note(noteSb.toString())
+                .status(ETransactionStatus.PENDING)
                 .build();
 
         transactionRepository.save(transaction);
-        accountRepository.save(account);
-
         return transaction;
+    }
 
+    @Transactional
+    public Account getAccount(Long accountId) {
+        Account account = accountRepository.findById(accountId).orElseThrow(EntityNotFoundException::new);
+        account.setAccountBalance(tigerBeetleService.getAccountBalance(accountId));
+        return account;
     }
 }
